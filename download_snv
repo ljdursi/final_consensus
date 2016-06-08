@@ -1,0 +1,8 @@
+#!/bin/bash
+
+readonly INPUTDIR=/oicr/data/pancanxfer/OxoG_workflow_variants/
+readonly OUTPUTDIR=./input_vcfs/raw/snv_mnv
+
+mkdir -p ${OUTPUTDIR}
+
+find ${INPUTDIR}/v2 -name "*.vcf.gz*" -exec ln -s {} ${OUTPUTDIR} \;

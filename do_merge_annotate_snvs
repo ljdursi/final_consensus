@@ -1,0 +1,23 @@
+#!/bin/bash
+
+readonly VARIANT=snv_mnv
+readonly INDIR=./input_vcfs/processed/${VARIANT}
+readonly OUTDIR=./annotated/${VARIANT}
+
+samples=$( ls ${INDIR} | grep -v ".tbi" | xargs -n1 basename | cut -f 1 -d . | sort | uniq )
+readonly LOGSDIR=logs/annotate_snvs
+
+mkdir -p ${LOGSDIR}
+
+for sample in $samples
+do
+    newest_input=$( ls -t ${INDIR}/${sample}*vcf.gz | head -n 1 )
+    outfile=${OUTDIR}/${sample}.annotated.${VARIANT}.vcf.gz
+    if [ ! -f ${outfile} ] || [ ${newest_input} -nt ${outfile} ]
+    then
+        echo ${sample}
+        qsub -cwd -e ${LOGSDIR} -o ${LOGSDIR} -N ${VARIANT}_${sample} \
+            -l h_vmem=8g \
+            ./scripts/merge_and_annotate_one_snv.sh ${sample}
+    fi
+done

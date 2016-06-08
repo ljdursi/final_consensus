@@ -1,0 +1,29 @@
+[[annotation]]
+file="/oicr/data/pancanxfer/consensus/final_consensus/vafs/@@SAMPLE@@.mutect_counts.vcf.gz"
+fields = ["VAF", "t_alt_count", "t_ref_count"]
+names = ["VAF", "t_alt_count", "t_ref_count"]
+ops = ["self", "self", "self"]
+
+[[annotation]]
+file="/oicr/data/pancanxfer/consensus/final_consensus/input_vcfs/processed/snv_mnv/@@SAMPLE@@.broad.snv_mnv.vcf.gz"
+fields = ["OXOG_Fail"]
+names = ["OXOG_Fail"]
+ops = ["self"]
+
+[[annotation]]
+file="/oicr/data/pancanxfer/consensus/final_consensus/input_vcfs/processed/snv_mnv/@@SAMPLE@@.dkfz.snv_mnv.vcf.gz"
+fields = ["OXOG_Fail"]
+names = ["OXOG_Fail"]
+ops = ["self"]
+
+[[annotation]]
+file="/oicr/data/pancanxfer/consensus/final_consensus/input_vcfs/processed/snv_mnv/@@SAMPLE@@.sanger.snv_mnv.vcf.gz"
+fields = ["OXOG_Fail"]
+names = ["OXOG_Fail"]
+ops = ["self"]
+
+[[annotation]]
+file="/oicr/data/pancanxfer/consensus/final_consensus/input_vcfs/processed/snv_mnv/@@SAMPLE@@.muse.snv_mnv.vcf.gz"
+fields = ["OXOG_Fail"]
+names = ["OXOG_Fail"]
+ops = ["self"]

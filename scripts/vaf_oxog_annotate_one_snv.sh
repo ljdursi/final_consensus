@@ -1,8 +1,7 @@
 #!/bin/bash -l
 module load vcfanno
 module load tabix/0.2.6
-module load python/2.7.2
-module load gcc/4.8.1 openblas python-packages/2
+module load python-packages/2
 
 function usage {
     >&2 echo "usage: $0 sample-id "
@@ -47,12 +46,19 @@ python ./scripts/clean_snv_calls.py ${tmp_output_file} -o ${output_file}
 rm ${tmp_output_file}
 
 readonly dkfz_bias_file=${DKFZBIASDIR}/${ID}.annotated.dkfz_bias.${VARIANT}.vcf.gz
-if [ -f ${dkfz_bias_file} ]
+readonly germline_maf=/oicr/data/pancanxfer/consensus/filters/germline/Broad_germline_site_filter_failed_mutations.tsv
+readonly classification_maf=/oicr/data/pancanxfer/consensus/annotations/classifications/${VARIANT}.maf
+
+if [ ! -f ${dkfz_bias_file} ] || [ ! -f ${germline_maf} ] || [ ! -f ${classification_maf} ]
 then
-    mv ${output_file} ${tmp_output_file}
-    python ./scripts/apply_bias_filters.py ${tmp_output_file} ${dkfz_bias_file} -o ${output_file}
+    >&2 echo "$0: Warning: ${dkfz_bias_file} or ${germline_maf} or ${classification_maf} not found, not applying filters/annotations"
 else
-    >&2 echo "$0: Warning: ${dkfz_bias_file} not found, not applying DKFZ bias filters"
+    mv ${output_file} ${tmp_output_file}
+    python ./scripts/apply_bias_filters.py ${dkfz_bias_file} -i ${tmp_output_file} \
+        | python ./scripts/omit_germline_from_maf.py ${germline_maf} ${ID} \
+        | python ./scripts/variant_classification_from_maf.py ${classification_maf} \
+            -o ${output_file}
+    rm ${tmp_output_file}
 fi
 
 bgzip -f ${output_file}

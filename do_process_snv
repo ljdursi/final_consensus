@@ -1,4 +1,9 @@
 #!/bin/bash
+#
+# Loops over raw input SNV callsets from the pipelines, and:
+#  - renames the files consistently
+#  - removes problematic header lines
+#  - Adds header lines
 
 module load tabix/0.2.6
 

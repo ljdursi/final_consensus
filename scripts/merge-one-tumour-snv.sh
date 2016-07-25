@@ -1,8 +1,7 @@
 #!/bin/bash -l
 
 export PATH=/u/jdursi/.local/bin:${PATH}
-module load python/2.7.2
-module load gcc/4.8.1 openblas python-packages/2
+module load python-packages/2
 module load tabix/0.2.6
 
 function usage {

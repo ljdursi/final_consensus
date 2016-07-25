@@ -1,8 +1,6 @@
 #!/bin/bash -l
 
 module purge
-module unuse /oicr/local/boutroslab/Modules/modulefiles
-module use /.mounts/labs/simpsonlab/modules/
 
 function usage {
     >&2 echo "usage: $0 sample-id "

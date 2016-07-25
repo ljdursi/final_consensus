@@ -9,18 +9,21 @@ def variant_tuple(record, alt):
 
 def get_bias_failures(biasfile, filtername=None):
     failures = {}
-    reader = vcf.Reader(biasfile)
-    for record in reader:
-        if not record.FILTER:
-            continue
-        for alt in record.ALT:
-            variant=variant_tuple(record, alt)
-            failures[variant] = filtername if filtername is not None else record.FILTER
+    try:
+        reader = vcf.Reader(filename=biasfile)
+        for record in reader:
+            if not record.FILTER:
+                continue
+            for alt in record.ALT:
+                variant=variant_tuple(record, alt)
+                failures[variant] = filtername if filtername is not None else record.FILTER
+    except:
+        pass
     return failures
 
 def main():
     parser = argparse.ArgumentParser(description='Fix dbsnp VP calls and add OXOG filter')
-    parser.add_argument('filtervcf', type=argparse.FileType('r'), help="Filter vcf file")
+    parser.add_argument('filtervcf', help="Filter vcf file")
     parser.add_argument('-i', '--input', type=argparse.FileType('r'), default=sys.stdin, help="Merged and annotated VCF file (default: stdin)")
     parser.add_argument('-o', '--output', type=argparse.FileType('w'), default=sys.stdout, help="Specify output file (default:stdout)")
     parser.add_argument('-f', '--filtername', help="Specify filter name to use (default: use filter field from VCF file)")

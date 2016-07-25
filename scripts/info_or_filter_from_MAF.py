@@ -11,23 +11,27 @@ def variant_tuple(record, alt):
 
 def get_classification_dict_from_MAF(maf, column):
     classifications = {}
-    mafreader = csv.DictReader(maf, delimiter='\t')
-    for record in mafreader:
-        items = ['Chromosome', 'Start_position', 'Reference_Allele', 'Tumor_Seq_Allele2']
-        if column is not None:
-            items += [column]
-        if not all([item in record for item in items]):
-            continue
-        variant=(record['Chromosome'], int(record['Start_position']), record['Reference_Allele'], record['Tumor_Seq_Allele2'])
-        if column is not None:
-            classifications[variant] = record[column]
-        else:
-            classifications[variant] = 1
+    try:
+        with open(maf, 'r') as maffile:
+            mafreader = csv.DictReader(maffile, delimiter='\t')
+            for record in mafreader:
+                items = ['Chromosome', 'Start_position', 'Reference_Allele', 'Tumor_Seq_Allele2']
+                if column is not None:
+                    items += [column]
+                if not all([item in record for item in items]):
+                    continue
+                variant=(record['Chromosome'], int(record['Start_position']), record['Reference_Allele'], record['Tumor_Seq_Allele2'])
+                if column is not None:
+                    classifications[variant] = record[column]
+                else:
+                    classifications[variant] = 1
+    except:
+        pass
     return classifications
 
 def main():
     parser = argparse.ArgumentParser(description='Add info or filter tag based on presence in MAF')
-    parser.add_argument('MAF', type=argparse.FileType('r'), help="MAF file for variant classification annotation")
+    parser.add_argument('MAF', type=str, help="MAF file for variant classification annotation")
     parser.add_argument('name', help='Name of info field or filter')
     parser.add_argument('-i', '--input', type=argparse.FileType('r'), default=sys.stdin, help="VCF file to be processed (default: stdin)")
     parser.add_argument('-o', '--output', type=argparse.FileType('w'), default=sys.stdout, help="Output file (default:stdout)")

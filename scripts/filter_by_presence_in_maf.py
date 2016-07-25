@@ -11,18 +11,22 @@ def variant_tuple(sample, record):
 
 def get_entries_from_MAF(maf):
     entries = set()
-    mafreader = csv.DictReader(maf, delimiter='\t')
-    for record in mafreader:
-        items = ['tumor_aliquot_id', 'Chromosome', 'Start_position' ]
-        if not all([item in record for item in items]):
-            continue
-        variant=(record['tumor_aliquot_id'], record['Chromosome'], int(record['Start_position']))
-        entries.add(variant)
+    try:
+        with open(maf, 'r') as maffile:
+            mafreader = csv.DictReader(maffile, delimiter='\t')
+            for record in mafreader:
+                items = ['tumor_aliquot_id', 'Chromosome', 'Start_position' ]
+                if not all([item in record for item in items]):
+                    continue
+                variant=(record['tumor_aliquot_id'], record['Chromosome'], int(record['Start_position']))
+                entries.add(variant)
+    except:
+        pass
     return entries
 
 def main():
     parser = argparse.ArgumentParser(description='Fix dbsnp VP calls and add OXOG filter')
-    parser.add_argument('MAF', type=argparse.FileType('r'), help="MAF file for filtering")
+    parser.add_argument('MAF', type=str, help="MAF file for filtering")
     parser.add_argument('sample', type=str, help="tumour aliquot id")
     parser.add_argument('filtername', type=str, help="Filter name to apply")
     parser.add_argument('-o', '--output', type=argparse.FileType('w'), default=sys.stdout, help="Specify output file (default:stdout)")

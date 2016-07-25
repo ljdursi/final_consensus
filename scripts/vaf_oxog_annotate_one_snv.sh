@@ -59,26 +59,21 @@ readonly STARS=/oicr/data/pancanxfer/consensus/annotations/star/PAWG_QC_Summary_
 PCAWG1ID=$( ./scripts/pancanid_to_pcawg1id.sh ${ID} )
 readonly VALIDATION_FILE=/oicr/data/pancanxfer/validation/vcfs/quality-filtered/${PCAWG1ID}.${VARIANT}.vcf
 
-if [ ! -f ${dkfz_bias_file} ] || [ ! -f ${germline_maf} ] || [ ! -f ${classification_maf} ]
-then
-    >&2 echo "$0: Warning: ${dkfz_bias_file} or ${germline_maf} or ${classification_maf} not found, not applying filters/annotations"
-else
-    mv ${output_file} ${tmp_output_file}
-    python ./scripts/apply_bias_filters.py ${dkfz_bias_file} -i ${tmp_output_file} \
-        | python ./scripts/apply_validation_calls.py ${VALIDATION_FILE} \
-        | python ./scripts/filter_by_presence_in_maf.py -d "Evidence of Germline Call Based on 1000Genomes" ${GERMLINE_MAF} ${ID} 1000GENOMES \
-        | python ./scripts/filter_by_presence_in_maf.py -d "Overlaps Germline Call" ${GERMLINE_OVLP_MAF} ${ID} GERMLINEOVLP \
-        | python ./scripts/filter_by_presence_in_maf.py -d "Presence in Panel of Normals" ${normalpanel} ${ID} NORMALPANEL \
-        | python ./scripts/filter_by_presence_in_maf.py --info -d "Sanger Tower: Possible Artifact" ${SIGR1} ${ID} signature_R1 \
-        | python ./scripts/filter_by_presence_in_maf.py --info -d "Suspected C>A oxo-guanine signature" ${SIGR2} ${ID} signature_R2 \
-        | python ./scripts/filter_by_presence_in_maf.py --info -d "T>A mutation often in bleed through context" ${SIGN3} ${ID} signature_N3 \
-        | python ./scripts/info_or_filter_from_MAF.py -a info -c Variant_Classification -d "Variant Classification" ${classification_maf} Variant_Classification \
-        | python ./scripts/info_or_filter_from_MAF.py -a filter -d "Variant no longer seen under remapping" ${remapfilter} REMAPFAIL \
-        | ./scripts/annotate_vcf_from_tsv_column.sh -c 11 -i ${ID} -n TumourInNormalEstimate -t ${TIN} \
-        | ./scripts/annotate_vcf_from_tsv_column.sh -c 5 -i ${ID} -n BAMQCStars -t ${STARS} \
-            > ${output_file}
-    rm ${tmp_output_file}
-fi
+mv ${output_file} ${tmp_output_file}
+python ./scripts/apply_bias_filters.py ${dkfz_bias_file} -i ${tmp_output_file} \
+    | python ./scripts/apply_validation_calls.py ${VALIDATION_FILE} \
+    | python ./scripts/filter_by_presence_in_maf.py -d "Evidence of Germline Call Based on 1000Genomes" ${GERMLINE_MAF} ${ID} 1000GENOMES \
+    | python ./scripts/filter_by_presence_in_maf.py -d "Overlaps Germline Call" ${GERMLINE_OVLP_MAF} ${ID} GERMLINEOVLP \
+    | python ./scripts/filter_by_presence_in_maf.py -d "Presence in Panel of Normals" ${normalpanel} ${ID} NORMALPANEL \
+    | python ./scripts/filter_by_presence_in_maf.py --info -d "Sanger Tower: Possible Artifact" ${SIGR1} ${ID} signature_R1 \
+    | python ./scripts/filter_by_presence_in_maf.py --info -d "Suspected C>A oxo-guanine signature" ${SIGR2} ${ID} signature_R2 \
+    | python ./scripts/filter_by_presence_in_maf.py --info -d "T>A mutation often in bleed through context" ${SIGN3} ${ID} signature_N3 \
+    | python ./scripts/info_or_filter_from_MAF.py -a info -c Variant_Classification -d "Variant Classification" ${classification_maf} Variant_Classification \
+    | python ./scripts/info_or_filter_from_MAF.py -a filter -d "Variant no longer seen under remapping" ${remapfilter} REMAPFAIL \
+    | ./scripts/annotate_vcf_from_tsv_column.sh -c 11 -i ${ID} -n TumourInNormalEstimate -t ${TIN} \
+    | ./scripts/annotate_vcf_from_tsv_column.sh -c 5 -i ${ID} -n BAMQCStars -t ${STARS} \
+        > ${output_file}
+rm ${tmp_output_file}
 
 bgzip -f ${output_file}
 tabix -p vcf ${output_file}.gz

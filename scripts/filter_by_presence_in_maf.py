@@ -28,21 +28,27 @@ def main():
     parser.add_argument('-o', '--output', type=argparse.FileType('w'), default=sys.stdout, help="Specify output file (default:stdout)")
     parser.add_argument('-i', '--input', type=argparse.FileType('r'), default=sys.stdin, help="Merged and annotated VCF file (default: stdin)")
     parser.add_argument('-d', '--desc', type=str, default="", help="Description of filter")
+    parser.add_argument('-n', '--info', action='store_true', help="Add info flag rather than filter")
     args = parser.parse_args()
 
     reader = vcf.Reader(args.input)
-    reader.filters[args.filtername] = vcf.parser._Filter(id=args.filtername, desc=args.desc)
+    if args.info:
+        reader.infos[args.filtername] = vcf.parser._Info(id=args.filtername, num=0, type='Flag', desc=args.desc, source=None, version=None)
+    else:
+        reader.filters[args.filtername] = vcf.parser._Filter(id=args.filtername, desc=args.desc)
     writer = vcf.Writer(args.output, reader)
 
     entries = get_entries_from_MAF(args.MAF)
     for record in reader:
         variant = variant_tuple(args.sample, record)
         if variant in entries:
-            if not record.FILTER:
-                record.FILTER = [args.filtername]
+            if not args.info:
+                if not record.FILTER:
+                    record.FILTER = [args.filtername]
+                else:
+                    record.FILTER = record.FILTER + [args.filtername]
             else:
-                record.FILTER = record.FILTER + [args.filtername]
-
+                record.INFO[args.filtername]=True
         writer.write_record(record)
 
     return 0

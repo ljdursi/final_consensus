@@ -72,8 +72,12 @@ do
     then
         newfile=$( basename $newfilegz .gz )
         echo $newfile
-        $BCFTOOLS norm -c w -m -indels -O v -f ${REFERENCE} ${file} 2>> logs/norm.errs.txt > ${OUTDIR}/${newfile}
+        $BCFTOOLS norm -c w -m -indels -O v -f ${REFERENCE} <( zcat ${file}) 2>> logs/norm.errs.txt > ${OUTDIR}/${newfile}
         bgzip -f ${OUTDIR}/${newfile}
         tabix -p vcf ${OUTDIR}/${newfile}.gz
     fi
 done
+
+# Some files end up containing nothing; remove them so that they 
+# don't confuse downstream analysis
+find ${OUTDIR} -name "*.gz" -size -100c -exec rm {} {}.tbi \;

@@ -1,0 +1,79 @@
+#!/bin/bash
+
+module load tabix/0.2.6
+
+readonly OUTDIR=./input_vcfs/processed/indel
+readonly INDIR=./input_vcfs/raw/indel
+readonly REFERENCE=/oicr/data/pancanxfer/ref/genome.fa
+readonly BCFTOOLS=/u/jdursi/sw/sga-extra/bcftools/bcftools
+
+mkdir -p "$OUTDIR"
+
+function newname {
+    local file=$1
+    local caller=$2
+    local base=$( basename $file )
+    if [[ $base == *".vcf.gz" ]]
+    then
+        ext="vcf.gz"
+    else
+        ext="vcf.gz.tbi"
+    fi
+    if [[ $base =~ _indel.vcf.gz ]] 
+    then
+        sample=$( echo $base | cut -f 1 -d _ )
+    else
+        sample=$( echo $base | cut -f 1 -d . )
+    fi
+    echo ${sample}.${caller}.indel.${ext}
+}
+
+for file in "${INDIR}"/*broad*indel*gz
+do 
+    newfile=$( newname $file broad )
+    if [ ! -f ${OUTDIR}/${newfile} ] || [ ${file} -nt ${OUTDIR}/${newfile} ]
+    then
+        echo $newfile
+        zcat $file \
+            | sed -e 's/		$/	.	.	./' \
+            | sed -e '/[#]/s/	[	]*	[	]*	[	]*$//' \
+            | bgzip -f > ${OUTDIR}/${newfile}
+        tabix -p vcf ${OUTDIR}/${newfile}
+    fi
+done
+
+for file in "${INDIR}"/*dkfz*
+do 
+    newfile=$( newname $file dkfz )
+    if [ ! -f ${OUTDIR}/${newfile} ] || [ ${file} -nt ${OUTDIR}/${newfile} ]
+    then
+        echo $newfile
+        cp $file ${OUTDIR}/${newfile}
+    fi
+done
+
+for file in "${INDIR}"/*sanger*vcf.gz
+do
+    newfile=$( newname $file sanger )
+    if [ ! -f ${OUTDIR}/${newfile} ] || [ ${file} -nt ${OUTDIR}/${newfile} ]
+    then
+        echo $newfile
+        zcat "$file" \
+            | grep -v '=$' \
+            | bgzip -f > ${OUTDIR}/${newfile}
+        tabix -p vcf ${OUTDIR}/${newfile}
+    fi
+done
+
+for file in "${INDIR}"/*smufin*vcf.gz
+do
+    newfilegz=$( newname $file smufin )
+    if [ ! -f ${OUTDIR}/${newfilegz} ] || [ ${file} -nt ${OUTDIR}/${newfilegz} ]
+    then
+        newfile=$( basename $newfilegz .gz )
+        echo $newfile
+        $BCFTOOLS norm -c w -m -indels -O v -f ${REFERENCE} ${file} 2>> logs/norm.errs.txt > ${OUTDIR}/${newfile}
+        bgzip -f ${OUTDIR}/${newfile}
+        tabix -p vcf ${OUTDIR}/${newfile}.gz
+    fi
+done

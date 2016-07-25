@@ -1,0 +1,31 @@
+#!/bin/bash
+
+readonly INPUTDIR=/oicr/data/pancanxfer/OxoG_workflow_variants/v1/
+readonly OUTPUTDIR=./input_vcfs/raw/indel
+
+mkdir -p ${OUTPUTDIR}
+
+find ${INPUTDIR} -maxdepth 2 -name "*_annotated*indel*vcf.gz*" -exec ln -s {} ${OUTPUTDIR} \;
+
+for file in /oicr/data/pancanxfer/consensus/reannotate/annotated/* 
+do
+    base=$( basename $file )
+    if [ -f "${OUTPUTDIR}/${base}" ]
+    then
+        rm ${OUTPUTDIR}/${base}
+    fi
+    ln -s ${file} ${OUTPUTDIR}
+done
+
+readonly SMUFINDIR=/oicr/data/pancanxfer/consensus/all_smufin
+for file in ${SMUFINDIR}/*gz
+do
+    base=$( basename $file )
+    id=$( echo $base | cut -f 1 -d . )
+    newname=${id}_annotated_smufin_indel.vcf.gz
+    if [ -f "${OUTPUTDIR}/${newname}" ]
+    then
+        rm ${OUTPUTDIR}/${newname}
+    fi
+    ln -s ${file} ${OUTPUTDIR}/${newname}
+done

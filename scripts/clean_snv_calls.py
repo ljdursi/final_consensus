@@ -2,6 +2,7 @@
 from __future__ import print_function
 import argparse
 import vcf  
+import vcf.parser
 import sys
 
 def main():
@@ -11,6 +12,8 @@ def main():
     args = parser.parse_args()
 
     reader = vcf.Reader(args.inputvcf)
+    reader.infos['dbsnp_somatic'] = vcf.parser._Info(id='dbsnp_somatic', num=None, type='Flag', desc='Known-somatic dbSNP variant', source=None, version=None)
+    reader.filters['OXOGFAIL'] = vcf.parser._Filter(id='OXOGFAIL', desc="Failed OXOG oxidative artifact filter")
     writer = vcf.Writer(args.output, reader)
 
     for record in reader:

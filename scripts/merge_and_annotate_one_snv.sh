@@ -18,5 +18,5 @@ then
 fi
 
 ./scripts/merge-one-tumour-snv.sh $ID
-./scripts/dbsnp_annotate_one_snv.sh $ID
+./scripts/dbsnp_annotate_one.sh $ID "snv_mnv"
 ./scripts/vaf_oxog_annotate_one_snv.sh $ID

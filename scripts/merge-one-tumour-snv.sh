@@ -40,9 +40,9 @@ if [[ $broadfile -nt $newest ]]; then newest=$broadfile; fi
 if [[ $dkfzfile -nt $newest ]]; then newest=$dkfzfile; fi
 if [[ $sangerfile -nt $newest ]]; then newest=$sangerfile; fi
 
-readonly outfile=${OUTDIR}/${ID}.merged.snv_mnv.vcf
+readonly outfile=${OUTDIR}/${ID}.merged.${VARIANT}.vcf
 
-if [[ -f ${outfile}.gz ]] && [[ ${outfile}.gz -nt $newest ]]
+if [[ -f "${outfile}.gz" ]] && [[ "${outfile}.gz" -nt "${newest}" ]]
 then
     >&2 echo "$0: ${outfile} exists and is newer than inputs; cowardly refusing to overwrite."
     exit 1

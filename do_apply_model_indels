@@ -1,0 +1,48 @@
+#!/bin/bash
+
+readonly VARIANT=indel
+readonly INDIR=./annotated_pre_model/${VARIANT}
+readonly RAWDIR=./annotated/${VARIANT}_raw
+readonly OUTDIR=./annotated/${VARIANT}
+mkdir -p ${OUTDIR}
+mkdir -p ${RAWDIR}
+
+if [ $# -eq 0 ] || [ -z "$1" ] || [ ! -f "$1" ] || [ -z "$2" ]
+then
+    echo "$0 - Apply an ensemble model (provided) to indel VCFs"
+    echo "Usage: $0 modelfile threshold [list-of-samples]"
+    exit 
+fi
+
+readonly MODEL=$1
+readonly THRESHOLD=$2
+readonly SAMPLESFILE=$3
+readonly LOGSDIR=logs/indel_models
+
+mkdir -p ${LOGSDIR}
+
+if [ -z ${SAMPLESFILE} ] || [ ! -f ${SAMPLESFILE} ] 
+then
+    echo "Using all samples:"
+    samples=$( basename $inputfile | cut -f 1 -d . )
+else
+    samples=$( cat $SAMPLESFILE )
+fi
+
+for sample in $samples
+do
+    inputfile=${INDIR}/${sample}.annotated.${VARIANT}.vcf.gz
+    if [ ! -f ${inputfile} ]
+    then
+        continue
+    fi
+    outputfile=${OUTDIR}/${sample}.consensus.${VARIANT}.vcf  # note: no .gz, will get bgzipped anyway
+    raw_outputfile=${RAWDIR}/${sample}.consensus.${VARIANT}.vcf  
+    if [ ! -f ${outputfile} ] || [ ${inputfile} -nt ${outputfile} ]
+    then
+        echo $sample
+        qsub -cwd -e ${LOGSDIR} -o ${LOGSDIR} -N Model_${sample}_${VARIANT} \
+            -l h_vmem=6g \
+            ./scripts/apply_model.sh ${MODEL} $inputfile $raw_outputfile $outputfile $THRESHOLD
+    fi
+done

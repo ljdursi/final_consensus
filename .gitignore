@@ -1,0 +1,12 @@
+*~
+annotated/snv_mnv/*
+annotated/indel/*
+annotated_pre_model/indel/*
+annotation
+byproject/*
+dbsnp_annotated/snv_mnv/*
+dbsnp_annotated/indel/*
+input_vcfs/*
+logs/*
+merged/*
+vafs/*

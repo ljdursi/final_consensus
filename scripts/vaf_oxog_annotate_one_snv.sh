@@ -29,8 +29,8 @@ fi
 
 readonly OUTDIR=annotated/${VARIANT}
 mkdir -p $OUTDIR
-readonly tmp_output_file=${OUTDIR}/${variant}/tmp.${ID}.annotated.${VARIANT}.vcf
-readonly output_file=${OUTDIR}/${variant}/${ID}.annotated.${VARIANT}.vcf
+readonly tmp_output_file=${OUTDIR}/tmp.${ID}.annotated.${VARIANT}.vcf
+readonly output_file=${OUTDIR}/${ID}.annotated.${VARIANT}.vcf
 sed -e "s/@@SAMPLE@@/${ID}/" annotation/vaf_oxog.annotations.conf.template > annotation/vaf.${ID}.conf
 
 if [[ -f $output_file ]] && [[ $outfile -nt $input_file ]]
@@ -39,7 +39,12 @@ then
     exit 1
 fi
 
-vcfanno -p 1 annotation/vaf.${ID}.conf ${input_file} > ${tmp_output_file}
+vcfanno -p 1 annotation/vaf.${ID}.conf ${input_file} \
+    | sed -e 's/\tFORMAT.*$//' \
+    | sed -e 's/^##INFO=<ID=VAF,.*$/##INFO=<ID=VAF,Number=1,Type=Float,Description="VAF from mutect read filter if available">/' \
+    | sed -e 's/^##INFO=<ID=t_alt_count,.*$/##INFO=<ID=t_alt_count,Number=1,Type=Integer,Description="Tumour alt count from mutect read filter if available">/' \
+    | sed -e 's/^##INFO=<ID=t_ref_count,.*$/##INFO=<ID=t_ref_count,Number=1,Type=Integer,Description="Tumour reference count from mutect read filter if available">/' \
+    > ${tmp_output_file}
 rm annotation/vaf.${ID}.conf
 python ./scripts/clean_snv_calls.py ${tmp_output_file} -o ${output_file}
 rm ${tmp_output_file}
@@ -61,6 +66,9 @@ readonly VALIDATION_FILE=/oicr/data/pancanxfer/validation/vcfs/quality-filtered/
 
 mv ${output_file} ${tmp_output_file}
 python ./scripts/apply_bias_filters.py ${dkfz_bias_file} -i ${tmp_output_file} \
+    | sed -e 's/^\(#CHROM.*\)/##FILTER=<ID=bSeq,Description="Sequencing Bias">\n##FILTER=<ID=bPcr,Description="PCR Bias">\n\1/' \
+    | grep -v '^##INFO=<ID=dbsnp_VP' \
+    | grep -v '^##INFO=<ID=OXOG_Fail' \
     | python ./scripts/apply_validation_calls.py ${VALIDATION_FILE} \
     | python ./scripts/filter_by_presence_in_maf.py -d "Evidence of Germline Call Based on 1000Genomes" ${GERMLINE_MAF} ${ID} 1000GENOMES \
     | python ./scripts/filter_by_presence_in_maf.py -d "Overlaps Germline Call" ${GERMLINE_OVLP_MAF} ${ID} GERMLINEOVLP \

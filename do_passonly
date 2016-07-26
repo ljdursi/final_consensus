@@ -1,0 +1,38 @@
+#!/bin/bash
+#
+# Loops over annotated calls and write out pass-only VCFs
+
+module load tabix/0.2.6
+
+readonly OUTDIR=./passonly
+readonly INDIR=./annotated
+
+mkdir -p "$OUTDIR"
+
+function drop_some_headers {
+    grep -v "ID=OXOG_Fail" \
+      | grep -v "ID=dbsnp_VP"
+}
+
+function header_or_pass {
+    awk '$1 ~ /^#/ || $7 == "."'
+}
+
+for variant in "snv_mnv"
+do
+    mkdir -p ${OUTDIR}/${variant}
+    for file in ${INDIR}/${variant}/*.snv_mnv.vcf.gz 
+    do
+        base=$( basename $file )
+        out=${OUTDIR}/${variant}/${base}
+        if [[ ! -f "$out" ]] || [[ "$file" -nt "$out" ]]
+        then
+            zcat $file \
+                | header_or_pass \
+                | drop_some_headers \
+                | bgzip \
+                > ${out}
+            tabix -p vcf ${out}
+        fi
+    done
+done

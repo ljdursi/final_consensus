@@ -20,7 +20,11 @@ def main():
         new_info = {}
 
         # copy some records over directly
-        for item in ['dbsnp', 'cosmic', 'Callers', 'NumCallers', 'repeat_masker', '1000genomes_AF', '1000genomes_ID', 'VAF', 't_alt_count', 't_ref_count']:
+        for item in ['VAF', 't_alt_count', 't_ref_count']:
+            if item in record.INFO and record.INFO[item] > 0:
+                new_info[item] = record.INFO[item]
+
+        for item in ['dbsnp', 'cosmic', 'Callers', 'NumCallers', 'repeat_masker', '1000genomes_AF', '1000genomes_ID']:
             if item in record.INFO:
                 new_info[item] = record.INFO[item]
 

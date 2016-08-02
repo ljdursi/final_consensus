@@ -30,7 +30,7 @@ fi
 readonly OUTDIR=annotated/${VARIANT}
 mkdir -p $OUTDIR
 readonly tmp_output_file=${OUTDIR}/tmp.${ID}.annotated.${VARIANT}.vcf
-readonly output_file=${OUTDIR}/${ID}.annotated.${VARIANT}.vcf
+readonly output_file=${OUTDIR}/${ID}.consensus.${VARIANT}.vcf
 sed -e "s/@@SAMPLE@@/${ID}/" annotation/vaf_oxog.annotations.conf.template > annotation/vaf.${ID}.conf
 
 if [[ -f $output_file ]] && [[ $outfile -nt $input_file ]]
@@ -55,6 +55,7 @@ readonly remapfilter=/oicr/data/pancanxfer/consensus/filters/realignment/${VARIA
 readonly normalpanel=/oicr/data/pancanxfer/consensus/filters/panel_of_normals/${VARIANT}/${ID}.${VARIANT}.maf
 readonly GERMLINE_MAF=/oicr/data/pancanxfer/consensus/filters/germline/Broad_germline_site_filter_failed_mutations.tsv
 readonly GERMLINE_OVLP_MAF=/oicr/data/pancanxfer/consensus/filters/germline_overlap/somatic_germline_overlap_by_patient.tsv
+readonly SNV_NEAR_GERMLINE=/oicr/data/pancanxfer/consensus/annotations/snv_near_germ_indels/somaticSnv_at_sameSampleSomaticAndGermlineIndels.tab 
 readonly SIGR1=/oicr/data/pancanxfer/consensus/annotations/pcawg7_artifacts/R1.tsv
 readonly SIGR2=/oicr/data/pancanxfer/consensus/annotations/pcawg7_artifacts/R2.tsv
 readonly SIGN3=/oicr/data/pancanxfer/consensus/annotations/pcawg7_artifacts/N3.tsv
@@ -70,12 +71,13 @@ python ./scripts/apply_bias_filters.py ${dkfz_bias_file} -i ${tmp_output_file} \
     | grep -v '^##INFO=<ID=dbsnp_VP' \
     | grep -v '^##INFO=<ID=OXOG_Fail' \
     | python ./scripts/apply_validation_calls.py ${VALIDATION_FILE} \
-    | python ./scripts/filter_by_presence_in_maf.py -d "Evidence of Germline Call Based on 1000Genomes" ${GERMLINE_MAF} ${ID} 1000GENOMES \
-    | python ./scripts/filter_by_presence_in_maf.py -d "Overlaps Germline Call" ${GERMLINE_OVLP_MAF} ${ID} GERMLINEOVLP \
+    | python ./scripts/filter_by_presence_in_maf.py -d "1000Genome variant with insufficient somatic evidence" ${GERMLINE_MAF} ${ID} GERM1000G \
+    | python ./scripts/filter_by_presence_in_maf.py -d "Overlaps germline Haplotype call" ${GERMLINE_OVLP_MAF} ${ID} GERMOVLP \
     | python ./scripts/filter_by_presence_in_maf.py -d "Presence in Panel of Normals" ${normalpanel} ${ID} NORMALPANEL \
     | python ./scripts/filter_by_presence_in_maf.py --info -d "Sanger Tower: Possible Artifact" ${SIGR1} ${ID} signature_R1 \
-    | python ./scripts/filter_by_presence_in_maf.py --info -d "Suspected C>A oxo-guanine signature" ${SIGR2} ${ID} signature_R2 \
+    | python ./scripts/filter_by_presence_in_maf.py --info -d "Suspected C>A oxo-guanine signature in some samples" ${SIGR2} ${ID} signature_R2 \
     | python ./scripts/filter_by_presence_in_maf.py --info -d "T>A mutation often in bleed through context" ${SIGN3} ${ID} signature_N3 \
+    | python ./scripts/filter_by_presence_in_maf.py --info -d "SNV is located near germline indel" ${SNV_NEAR_GERMLINE} ${ID} snv_near_germ_indel \
     | python ./scripts/info_or_filter_from_MAF.py -a info -c Variant_Classification -d "Variant Classification" ${classification_maf} Variant_Classification \
     | python ./scripts/info_or_filter_from_MAF.py -a filter -d "Variant no longer seen under remapping" ${remapfilter} REMAPFAIL \
     | ./scripts/annotate_vcf_from_tsv_column.sh -c 11 -i ${ID} -n TumourInNormalEstimate -t ${TIN} \

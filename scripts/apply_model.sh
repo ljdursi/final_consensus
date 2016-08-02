@@ -5,7 +5,7 @@
 
 module purge 
 module use /.mounts/labs/simpsonlab/modules/
-module load R/3.2.5
+module load R/3.3.0
 module load python-packages/2
 module load tabix/0.2.6
 
@@ -24,6 +24,8 @@ readonly INPUTVCF=$2
 readonly RAWOUTPUTVCF=$3
 readonly OUTPUTVCF=$4
 readonly THRESH=${5:-${DEFTHRESH}}
+
+readonly VARIANT="indel"
 
 Rscript --vanilla scripts/filter_calls_by_model.R $MODEL $INPUTVCF $RAWOUTPUTVCF $THRESH
 

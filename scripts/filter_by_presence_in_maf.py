@@ -20,6 +20,9 @@ def get_entries_from_MAF(maf):
                     continue
                 variant=(record['tumor_aliquot_id'], record['Chromosome'], int(record['Start_position']))
                 entries.add(variant)
+                if 'End_position' in record:
+                    variant=(record['tumor_aliquot_id'], record['Chromosome'], int(record['End_position']))
+                    entries.add(variant)
     except:
         pass
     return entries
@@ -44,15 +47,18 @@ def main():
 
     entries = get_entries_from_MAF(args.MAF)
     for record in reader:
-        variant = variant_tuple(args.sample, record)
-        if variant in entries:
-            if not args.info:
-                if not record.FILTER:
-                    record.FILTER = [args.filtername]
+        variants = [variant_tuple(args.sample, record)]
+        if len(record.ALT[0]) != len(record.REF):
+            variants += [(args.sample, record.CHROM, record.POS+abs(len(record.ALT[0])-len(record.REF)))]
+        for variant in variants:
+            if variant in entries:
+                if not args.info:
+                    if not record.FILTER:
+                        record.FILTER = [args.filtername]
+                    elif args.filtername not in record.FILTER:
+                        record.FILTER = record.FILTER + [args.filtername]
                 else:
-                    record.FILTER = record.FILTER + [args.filtername]
-            else:
-                record.INFO[args.filtername]=True
+                    record.INFO[args.filtername]=True
         writer.write_record(record)
 
     return 0

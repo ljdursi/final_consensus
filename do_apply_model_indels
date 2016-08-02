@@ -24,14 +24,14 @@ mkdir -p ${LOGSDIR}
 if [ -z ${SAMPLESFILE} ] || [ ! -f ${SAMPLESFILE} ] 
 then
     echo "Using all samples:"
-    samples=$( basename $inputfile | cut -f 1 -d . )
+    samples=$( ls input_vcfs/processed/indel/* | cut -f 1 -d . | sort -u)
 else
     samples=$( cat $SAMPLESFILE )
 fi
 
 for sample in $samples
 do
-    inputfile=${INDIR}/${sample}.annotated.${VARIANT}.vcf.gz
+    inputfile=${INDIR}/${sample}.annotated.${VARIANT}.vcf
     if [ ! -f ${inputfile} ]
     then
         continue

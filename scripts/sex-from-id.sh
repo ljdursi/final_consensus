@@ -13,6 +13,7 @@ fi
 
 readonly donor=$( ./scripts/donor-from-id.sh ${ID} )
 sex=$( grep ${donor} ${DONORS} \
-        | cut -f 4 -d, )
+        | cut -f 4 -d, \
+        | head -n1 )
 
 echo "${sex}"

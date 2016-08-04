@@ -1,6 +1,6 @@
 #!/bin/bash
 
-readonly METADATA=/oicr/data/pancanxfer/consensus/final_consensus/metadata/pcawg_summary_internal_freeze_160323.tsv
+readonly METADATA=/oicr/data/pancanxfer/consensus/final_consensus/metadata/release.tsv
 readonly ID=$1
 
 if [[ -z "$ID" ]]

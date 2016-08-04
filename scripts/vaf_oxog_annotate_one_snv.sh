@@ -61,9 +61,12 @@ readonly SIGR2=/oicr/data/pancanxfer/consensus/annotations/pcawg7_artifacts/R2.t
 readonly SIGN3=/oicr/data/pancanxfer/consensus/annotations/pcawg7_artifacts/N3.tsv
 readonly TIN=/oicr/data/pancanxfer/consensus/annotations/TiN/release_may2016.v1.1.TiN__donor.TiNsorted.20Jul2016.tsv
 readonly STARS=/oicr/data/pancanxfer/consensus/annotations/star/PAWG_QC_Summary_of_Measures.tsv
+readonly RELEASE=/oicr/data/pancanxfer/consensus/annotations/release/by_tumour_id.tsv
 
 PCAWG1ID=$( ./scripts/pancanid_to_pcawg1id.sh ${ID} )
 readonly VALIDATION_FILE=/oicr/data/pancanxfer/validation/vcfs/quality-filtered/${PCAWG1ID}.${VARIANT}.vcf
+
+SEX=$( ./scripts/sex-from-id.sh ${ID} )
 
 mv ${output_file} ${tmp_output_file}
 python ./scripts/apply_bias_filters.py ${dkfz_bias_file} -i ${tmp_output_file} \
@@ -80,8 +83,10 @@ python ./scripts/apply_bias_filters.py ${dkfz_bias_file} -i ${tmp_output_file} \
     | python ./scripts/filter_by_presence_in_maf.py --info -d "SNV is located near germline indel" ${SNV_NEAR_GERMLINE} ${ID} snv_near_germ_indel \
     | python ./scripts/info_or_filter_from_MAF.py -a info -c Variant_Classification -d "Variant Classification" ${classification_maf} Variant_Classification \
     | python ./scripts/info_or_filter_from_MAF.py -a filter -d "Variant no longer seen under remapping" ${remapfilter} REMAPFAIL \
+    | python ./scripts/apply_sex_filter.py -s ${SEX} \
     | ./scripts/annotate_vcf_from_tsv_column.sh -c 11 -i ${ID} -n TumourInNormalEstimate -t ${TIN} \
-    | ./scripts/annotate_vcf_from_tsv_column.sh -c 5 -i ${ID} -n BAMQCStars -t ${STARS} \
+    | ./scripts/annotate_vcf_from_tsv_column.sh -c 3 -i ${ID} -n BAMQCStars -t ${RELEASE} \
+    | ./scripts/annotate_vcf_from_tsv_column.sh -c 2 -i ${ID} -n ContEST -t ${RELEASE} \
         > ${output_file}
 rm ${tmp_output_file}
 

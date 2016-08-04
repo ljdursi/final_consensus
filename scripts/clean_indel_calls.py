@@ -7,7 +7,7 @@ import sys
 
 def round_dig(value, ndigits=2):
     scale=10**ndigits
-    return int(num*scale)*1./scale
+    return int(value*scale)*1./scale
 
 def main():
     parser = argparse.ArgumentParser(description='Annotate merged vcf with VAF information where available')
@@ -23,6 +23,7 @@ def main():
     reader.infos['n_alt_count'] = vcf.parser._Info(id='n_vaf', num=1, type='Integer', desc='Normal alt count from sga where available', source=None, version=None)
     reader.infos['n_ref_count'] = vcf.parser._Info(id='n_vaf', num=1, type='Integer', desc='Normal ref count from sga where available', source=None, version=None)
     reader.infos['model_score'] = vcf.parser._Info(id='model_score', num=1, type='Float', desc='consensus model score, 0-1', source=None, version=None)
+    reader.filters['LOWSUPPORT'] = vcf.parser._Filter(id='LOWSUPPORT', desc='Insufficient support in consensus model')
     writer = vcf.Writer(args.output, reader)
 
     for record in reader:
@@ -42,7 +43,7 @@ def main():
                 new_info[item] = record.INFO[item]
 
         if 'model_score' in record.INFO:
-            new_info['model_score'] = round_dig(float(record.INFO[item]),3)
+            new_info['model_score'] = round_dig(float(record.INFO['model_score']),3)
 
         if 'dbsnp_VP' in record.INFO:
             qualbyte = int(record.INFO['dbsnp_VP'],16) & 255

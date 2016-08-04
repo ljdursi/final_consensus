@@ -83,7 +83,7 @@ python ./scripts/apply_bias_filters.py ${dkfz_bias_file} -i ${tmp_output_file} \
     | python ./scripts/filter_by_presence_in_maf.py --info -d "SNV is located near germline indel" ${SNV_NEAR_GERMLINE} ${ID} snv_near_germ_indel \
     | python ./scripts/info_or_filter_from_MAF.py -a info -c Variant_Classification -d "Variant Classification" ${classification_maf} Variant_Classification \
     | python ./scripts/info_or_filter_from_MAF.py -a filter -d "Variant no longer seen under remapping" ${remapfilter} REMAPFAIL \
-    | python ./scripts/apply_sex_filter.py -s ${SEX} \
+    | python ./scripts/apply_sex_filter.py -s "${SEX}" \
     | ./scripts/annotate_vcf_from_tsv_column.sh -c 11 -i ${ID} -n TumourInNormalEstimate -t ${TIN} \
     | ./scripts/annotate_vcf_from_tsv_column.sh -c 3 -i ${ID} -n BAMQCStars -t ${RELEASE} \
     | ./scripts/annotate_vcf_from_tsv_column.sh -c 2 -i ${ID} -n ContEST -t ${RELEASE} \

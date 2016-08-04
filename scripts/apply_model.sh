@@ -46,7 +46,7 @@ python ./scripts/clean_indel_calls.py ${RAWOUTPUTVCF} \
     | ./scripts/annotate_vcf_from_tsv_column.sh -c 11 -i ${ID} -n TumourInNormalEstimate -t ${TIN} \
     | ./scripts/annotate_vcf_from_tsv_column.sh -c 3 -i ${ID} -n BAMQCStars -t ${RELEASE} \
     | ./scripts/annotate_vcf_from_tsv_column.sh -c 2 -i ${ID} -n ContEST -t ${RELEASE} \
-    | python ./scripts/apply_sex_filter.py -s ${SEX} \
+    | python ./scripts/apply_sex_filter.py -s "${SEX}" \
     | grep -v "^##INFO=<ID=RepeatRefCount" \
     | grep -v "^##INFO=<ID=TumorTotalDepth" \
     | grep -v "^##INFO=<ID=TumorVarDepth" \

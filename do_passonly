@@ -6,6 +6,12 @@ module load tabix/0.2.6
 
 readonly OUTDIR=./passonly
 readonly INDIR=./annotated
+readonly BLACKLIST=../filters/blacklist/blacklist.txt
+readonly INCOMPLETE=../filters/incomplete/incomplete.txt
+readonly GRAYLIST=../filters/graylist/graylist.txt
+readonly BADLIST=badlist.txt
+
+cat ${BLACKLIST} ${INCOMPLETE} | sort -u > ${BADLIST}
 
 mkdir -p "$OUTDIR"
 
@@ -18,12 +24,15 @@ function header_or_pass {
     awk '$1 ~ /^#/ || $7 == "."'
 }
 
-for variant in "snv_mnv"
+for variant in "snv_mnv" "indel"
 do
     mkdir -p ${OUTDIR}/${variant}
-    for file in ${INDIR}/${variant}/*.snv_mnv.vcf.gz 
+    files=$( ls ${INDIR}/${variant}/*.${variant}.vcf.gz | grep -vf ${BADLIST} )
+    for file in ${files}
     do
         base=$( basename $file )
+        id=$( echo $base | cut -f 1 -d . )
+        echo "${id} ${variant}"
         out=${OUTDIR}/${variant}/${base}
         if [[ ! -f "$out" ]] || [[ "$file" -nt "$out" ]]
         then
@@ -34,5 +43,11 @@ do
                 > ${out}
             tabix -p vcf ${out}
         fi
+    done
+    files=$( ls ${OUTDIR}/${variant}/*.vcf.gz* | grep -f ${GRAYLIST} )
+    mkdir -p ${OUTDIR}/graylist/${variant}
+    for file in ${files}
+    do
+        mv ${file} ${OUTDIR}/graylist/${variant}
     done
 done

@@ -1,0 +1,43 @@
+#!/bin/bash
+#
+# Splits annotated files by tcga/icgc
+
+module load tabix/0.2.6
+
+readonly OUTDIR=./byproject
+readonly INDIR=./annotated
+readonly BLACKLIST=../filters/blacklist/blacklist.txt
+readonly INCOMPLETE=../filters/incomplete/incomplete.txt
+readonly GRAYLIST=../filters/graylist/graylist.txt
+readonly BADLIST=badlist.txt
+
+cat ${BLACKLIST} ${INCOMPLETE} | sort -u > ${BADLIST}
+
+mkdir -p "$OUTDIR"
+mkdir -p "$OUTDIR"/tcga
+mkdir -p "$OUTDIR"/icgc
+
+for variant in "snv_mnv" "indel"
+do
+    mkdir -p ${OUTDIR}/tcga/${variant}
+    mkdir -p ${OUTDIR}/icgc/${variant}
+    files=$( ls ${INDIR}/${variant}/*.${variant}.vcf.gz | grep -vf ${BADLIST} )
+    for file in ${files}
+    do
+        base=$( basename $file )
+        id=$( echo $base | cut -f 1 -d . )
+        project=$( ./scripts/tcga-icgc-from-id.sh ${id} )
+        cp $file ${OUTDIR}/${project}/${variant}
+        cp ${file}.tbi ${OUTDIR}/${project}/${variant}
+    done
+
+    for project in icgc tcga
+    do
+        files=$( ls ${OUTDIR}/${project}/${variant}/*.vcf.gz* | grep -f ${GRAYLIST} )
+        mkdir -p ${OUTDIR}/${project}/graylist/${variant}
+        for file in ${files}
+        do
+            mv ${file} ${OUTDIR}/${project}/graylist/${variant}
+        done
+    done
+done

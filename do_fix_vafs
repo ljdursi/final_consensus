@@ -1,0 +1,30 @@
+#!/bin/bash
+
+module load tabix/0.2.6
+
+readonly OUTDIR=./vafs
+readonly INDIR=./raw-vafs
+
+mkdir -p "$OUTDIR"
+
+for file in ${INDIR}/*vcf
+do
+    base=$( basename $file )
+    outfile=${OUTDIR}/${base}
+    if [ ! -f ${outfile}.gz ] || [ ${file} -nt ${outfile}.gz ]
+    then
+        echo "${outfile}"
+        grep "^##" ${file} > ${OUTDIR}/${base}
+        echo '##INFO=<ID=VAF,Number=1,Type=Float,Description="GATK-based VAF of variant">' >> ${OUTDIR}/${base}
+        echo '##INFO=<ID=t_alt_count,Number=1,Type=Integer,Description="GATK-based count of reads supporting variant in tumour">' >> ${OUTDIR}/${base}
+        echo '##INFO=<ID=t_ref_count,Number=1,Type=Integer,Description="GATK-based count of reads supporting reference in tumour">' >> ${OUTDIR}/${base}
+        grep "^#C" ${file} >> ${OUTDIR}/${base}
+        grep -v "^#" ${file} \
+            | sort -k1,1d -k2,2n \
+            >> ${outfile}
+        bgzip ${outfile}
+        tabix -p vcf ${outfile}.gz
+    else 
+        echo "Not overwriting file ${outfile}.gz"
+    fi
+done

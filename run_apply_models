@@ -1,0 +1,5 @@
+#!/bin/bash
+readonly THRESHOLD=0.71
+./do_apply_model_indels models/stacked-logistic-no-broad.RData ${THRESHOLD} input_vcfs/processed/no-broad.txt
+./do_apply_model_indels models/stacked-logistic-no-smufin.RData ${THRESHOLD} input_vcfs/processed/no-smufin.txt
+./do_apply_model_indels models/stacked-logistic-all-four.RData ${THRESHOLD} input_vcfs/processed/all-four.txt

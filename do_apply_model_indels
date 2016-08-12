@@ -38,11 +38,16 @@ do
     fi
     outputfile=${OUTDIR}/${sample}.consensus.${VARIANT}.vcf  # note: no .gz, will get bgzipped anyway
     raw_outputfile=${RAWDIR}/${sample}.consensus.${VARIANT}.vcf  
+#
+# the line below:
+# -l h_vmem=3g -pe smp 2 \
+# should be -l h_vmem=6g.
+# 
     if [ ! -f ${outputfile} ] || [ ${inputfile} -nt ${outputfile} ]
     then
         echo $sample
         qsub -cwd -e ${LOGSDIR} -o ${LOGSDIR} -N Model_${sample}_${VARIANT} \
-            -l h_vmem=6g \
+            -l h_vmem=3g -pe smp 2 \
             ./scripts/apply_model.sh ${MODEL} $inputfile $raw_outputfile $outputfile $THRESHOLD
     fi
 done

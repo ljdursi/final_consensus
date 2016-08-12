@@ -57,7 +57,7 @@ filterVcfByModel <- function(infilename, outfilename, model, formula, predict_fu
   
   all.prediction <- rep("NOCALL", nrow(vcf_df))
   prediction.prob <- predict_function(model, formula, vcf_df)
-  all.prediction <- ifelse(prediction.prob >= threshold & vcf_df$union == 1, ".", "LOWSUPPORT")
+  all.prediction <- ifelse(prediction.prob >= threshold, ".", "LOWSUPPORT")
   if (class(all.prediction) == "matrix") {
     all.prediction <- all.prediction[,1]
   }

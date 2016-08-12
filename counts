@@ -1,0 +1,18 @@
+#!/bin/bash
+rm -f snvs.csv
+echo "id,count" > snvs.csv
+for file in passonly/snv_mnv/*gz
+do
+    id=$( basename $file | cut -f 1 -d . )
+    nsnvs=$( zcat $file | grep -cv "^#" )
+    echo "${id},${nsnvs}" >> snvs.csv
+done
+
+rm -f indels.csv
+echo "id,count" > indels.csv
+for file in passonly/indel/*gz
+do
+    id=$( basename $file | cut -f 1 -d . )
+    nsnvs=$( zcat $file | grep -cv "^#" )
+    echo "${id},${nsnvs}" >> indels.csv
+done

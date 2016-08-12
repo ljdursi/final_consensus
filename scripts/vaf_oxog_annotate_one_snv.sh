@@ -80,7 +80,7 @@ python ./scripts/apply_bias_filters.py ${dkfz_bias_file} -i ${tmp_output_file} \
     | python ./scripts/filter_by_presence_in_maf.py --info -d "Sanger Tower: Possible Artifact" ${SIGR1} ${ID} signature_R1 \
     | python ./scripts/filter_by_presence_in_maf.py --info -d "Suspected C>A oxo-guanine signature in some samples" ${SIGR2} ${ID} signature_R2 \
     | python ./scripts/filter_by_presence_in_maf.py --info -d "T>A mutation often in bleed through context" ${SIGN3} ${ID} signature_N3 \
-    | python ./scripts/filter_by_presence_in_maf.py --info -d "SNV is located near germline indel" ${SNV_NEAR_GERMLINE} ${ID} snv_near_germ_indel \
+    | python ./scripts/filter_by_presence_in_maf.py --info -d "SNV is located near indel" ${SNV_NEAR_GERMLINE} ${ID} snv_near_indel \
     | python ./scripts/info_or_filter_from_MAF.py -a info -c Variant_Classification -d "Variant Classification" ${classification_maf} Variant_Classification \
     | python ./scripts/info_or_filter_from_MAF.py -a filter -d "Variant no longer seen under remapping" ${remapfilter} REMAPFAIL \
     | python ./scripts/apply_sex_filter.py -s "${SEX}" \

@@ -29,3 +29,14 @@ do
     fi
     ln -s ${file} ${OUTPUTDIR}/${newname}
 done
+
+for file in ../fixed_data/*indel*
+do
+    base=$( basename $file )
+    if [[ -f ${OUTPUTDIR}/${base} ]] 
+    then
+        rm ${OUTPUTDIR}/${base} 
+    fi
+    echo ${base}
+    cp ${file} ${OUTPUTDIR}
+done

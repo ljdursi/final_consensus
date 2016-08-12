@@ -78,3 +78,19 @@ do
         tabix -p vcf ${OUTDIR}/${newfile}
     fi
 done
+
+#fixed data is already processed
+readonly FIXEDDIR=../fixed_data/
+for caller in broad dkfz sanger muse
+do
+    for file in ${FIXEDDIR}/*${caller}*SNV*vcf.gz
+    do 
+        newfile=$( basename $file | cut -f 1 -d _ ).${caller}.snv_mnv.vcf.gz
+        if [ ! -f ${OUTDIR}/${newfile} ] || [ ${file} -nt ${OUTDIR}/${newfile} ]
+        then
+            echo $file
+            cp ${file} ${OUTDIR}/${newfile}
+            cp ${file}.tbi ${OUTDIR}/${newfile}.tbi
+        fi
+    done
+done

@@ -19,6 +19,8 @@ readonly THRESHOLD=$2
 readonly SAMPLESFILE=$3
 readonly LOGSDIR=logs/indel_models
 
+readonly DATE=$( date +%Y%m%d )
+
 mkdir -p ${LOGSDIR}
 
 if [ -z ${SAMPLESFILE} ] || [ ! -f ${SAMPLESFILE} ] 
@@ -36,8 +38,8 @@ do
     then
         continue
     fi
-    outputfile=${OUTDIR}/${sample}.consensus.${VARIANT}.vcf  # note: no .gz, will get bgzipped anyway
-    raw_outputfile=${RAWDIR}/${sample}.consensus.${VARIANT}.vcf  
+    outputfile=${OUTDIR}/${sample}.consensus.${DATE}.somatic.${VARIANT}.vcf # note: no .gz, will get bgzipped anyway
+    raw_outputfile=${RAWDIR}/${sample}.consensus.${DATE}.somatic.${VARIANT}.vcf  
 #
 # the line below:
 # -l h_vmem=3g -pe smp 2 \

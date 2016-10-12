@@ -6,8 +6,27 @@ import vcf.parser
 import csv
 import sys
 
+# MAF has different convention than VCFs, removes common prefixes
+def remove_common_prefix(ref, alt):
+    prefix_len = 0
+    for r,a in zip(ref, alt):
+        if r != a:
+            break
+        prefix_len += 1
+    newref = ref[prefix_len:]
+    newalt = alt[prefix_len:]
+    if newref == "":
+        newref = "-"
+    if newalt == "":
+        newalt = "-"
+    return newref, newalt
+
 def variant_tuple(record, alt):
-    return (record.CHROM, record.POS, record.REF, str(alt))
+    newref, newalt = remove_common_prefix(record.REF, str(alt))
+    pos = record.POS
+    if newalt == "-":
+        pos += 1
+    return (record.CHROM, pos, newref, newalt)
 
 def get_classification_dict_from_MAF(maf, column):
     classifications = {}

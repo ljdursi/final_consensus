@@ -14,6 +14,7 @@ def main():
     reader = vcf.Reader(args.inputvcf)
     reader.infos['dbsnp_somatic'] = vcf.parser._Info(id='dbsnp_somatic', num=None, type='Flag', desc='Known-somatic dbSNP variant', source=None, version=None)
     reader.filters['OXOGFAIL'] = vcf.parser._Filter(id='OXOGFAIL', desc="Failed OXOG oxidative artifact filter")
+    reader.metadata['reference']='ftp://ftp.sanger.ac.uk/pub/project/PanCancer/genome.fa.gz'
     writer = vcf.Writer(args.output, reader)
 
     for record in reader:

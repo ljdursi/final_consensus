@@ -32,7 +32,7 @@ Rscript --vanilla scripts/filter_calls_by_model.R $MODEL $INPUTVCF $RAWOUTPUTVCF
 ID=$( basename $INPUTVCF | cut -f 1 -d . )
 PCAWG1ID=$( ./scripts/pancanid_to_pcawg1id.sh ${ID} )
 readonly STARS=/oicr/data/pancanxfer/consensus/annotations/star/PAWG_QC_Summary_of_Measures.tsv
-readonly classification_maf=/oicr/data/pancanxfer/consensus/annotations/classifications/${VARIANT}/${ID}.${VARIANT}.maf
+readonly classification_maf=/oicr/data/pancanxfer/consensus/annotations/final_classifications/${VARIANT}/${ID}.${VARIANT}.maf
 readonly normalpanel=/oicr/data/pancanxfer/consensus/filters/panel_of_normals/${VARIANT}/${ID}.${VARIANT}.maf
 readonly TIN=/oicr/data/pancanxfer/consensus/annotations/TiN/release_may2016.v1.1.TiN__donor.TiNsorted.20Jul2016.tsv
 readonly VALIDATION_FILE=/oicr/data/pancanxfer/validation/vcfs/quality-filtered/${PCAWG1ID}.${VARIANT}.vcf
@@ -55,6 +55,8 @@ python ./scripts/clean_indel_calls.py ${RAWOUTPUTVCF} \
     | grep -v "^##INFO=<ID=NormalVarDepth" \
     | grep -v "^##INFO=<ID=NormalVAF" \
     | grep -v "^##INFO=<ID=dbsnp_VP" \
+    | grep -v "^##contig=<ID=" \
+    | sed -e 's/t_vaf/VAF/g' \
         > ${OUTPUTVCF}
 bgzip -f ${OUTPUTVCF}
 tabix -p vcf ${OUTPUTVCF}.gz

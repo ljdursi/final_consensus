@@ -16,12 +16,14 @@ def main():
     args = parser.parse_args()
 
     reader = vcf.Reader(args.inputvcf)
+    reader.metadata['reference']='ftp://ftp.sanger.ac.uk/pub/project/PanCancer/genome.fa.gz'
     reader.infos['dbsnp_somatic'] = vcf.parser._Info(id='dbsnp_somatic', num=None, type='Flag', desc='Known-somatic dbSNP variant', source=None, version=None)
     reader.infos['t_vaf'] = vcf.parser._Info(id='t_vaf', num=1, type='Float', desc='VAF in tumor from sga', source=None, version=None)
-    reader.infos['t_alt_count'] = vcf.parser._Info(id='t_vaf', num=1, type='Integer', desc='Tumor alt count from sga', source=None, version=None)
-    reader.infos['t_ref_count'] = vcf.parser._Info(id='t_vaf', num=1, type='Integer', desc='Tumor ref count from sga where available', source=None, version=None)
-    reader.infos['n_alt_count'] = vcf.parser._Info(id='n_vaf', num=1, type='Integer', desc='Normal alt count from sga where available', source=None, version=None)
-    reader.infos['n_ref_count'] = vcf.parser._Info(id='n_vaf', num=1, type='Integer', desc='Normal ref count from sga where available', source=None, version=None)
+    reader.infos['n_vaf'] = vcf.parser._Info(id='n_vaf', num=1, type='Float', desc='VAF in normal from sga', source=None, version=None)
+    reader.infos['t_alt_count'] = vcf.parser._Info(id='t_alt_count', num=1, type='Integer', desc='Tumor alt count from sga', source=None, version=None)
+    reader.infos['t_ref_count'] = vcf.parser._Info(id='t_ref_count', num=1, type='Integer', desc='Tumor ref count from sga if non-zero', source=None, version=None)
+    reader.infos['n_alt_count'] = vcf.parser._Info(id='n_alt_count', num=1, type='Integer', desc='Normal alt count from sga if non-zero', source=None, version=None)
+    reader.infos['n_ref_count'] = vcf.parser._Info(id='n_ref_count', num=1, type='Integer', desc='Normal ref count from sga if non-zero', source=None, version=None)
     reader.infos['model_score'] = vcf.parser._Info(id='model_score', num=1, type='Float', desc='consensus model score, 0-1', source=None, version=None)
     reader.filters['LOWSUPPORT'] = vcf.parser._Filter(id='LOWSUPPORT', desc='Insufficient support in consensus model')
     writer = vcf.Writer(args.output, reader)

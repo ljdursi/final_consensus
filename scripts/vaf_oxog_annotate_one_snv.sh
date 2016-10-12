@@ -29,8 +29,9 @@ fi
 
 readonly OUTDIR=annotated/${VARIANT}
 mkdir -p $OUTDIR
-readonly tmp_output_file=${OUTDIR}/tmp.${ID}.annotated.${VARIANT}.vcf
-readonly output_file=${OUTDIR}/${ID}.consensus.${VARIANT}.vcf
+readonly DATE=$( date +%Y%m%d )
+readonly tmp_output_file=${OUTDIR}/tmp.${ID}.annotated.${DATE}.somatic.${VARIANT}.vcf
+readonly output_file=${OUTDIR}/${ID}.consensus.${DATE}.somatic.${VARIANT}.vcf
 sed -e "s/@@SAMPLE@@/${ID}/" annotation/vaf_oxog.annotations.conf.template > annotation/vaf.${ID}.conf
 
 if [[ -f $output_file ]] && [[ $outfile -nt $input_file ]]
@@ -50,7 +51,7 @@ python ./scripts/clean_snv_calls.py ${tmp_output_file} -o ${output_file}
 rm ${tmp_output_file}
 
 readonly dkfz_bias_file=/oicr/data/pancanxfer/consensus/filters/dkfz_bias/${VARIANT}/${ID}.annotated.dkfz_bias.${VARIANT}.vcf.gz
-readonly classification_maf=/oicr/data/pancanxfer/consensus/annotations/classifications/${VARIANT}/${ID}.${VARIANT}.maf
+readonly classification_maf=/oicr/data/pancanxfer/consensus/annotations/final_classifications/${VARIANT}/${ID}.${VARIANT}.maf
 readonly remapfilter=/oicr/data/pancanxfer/consensus/filters/realignment/${VARIANT}/${ID}.${VARIANT}.maf
 readonly normalpanel=/oicr/data/pancanxfer/consensus/filters/panel_of_normals/${VARIANT}/${ID}.${VARIANT}.maf
 readonly GERMLINE_MAF=/oicr/data/pancanxfer/consensus/filters/germline/Broad_germline_site_filter_failed_mutations.tsv
